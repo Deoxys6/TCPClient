@@ -29,7 +29,7 @@ namespace ClientTest
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Enter an IP");
+                             Console.WriteLine("Enter an IP");
                             ip = Console.ReadLine();
                         }
                     }
