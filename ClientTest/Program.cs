@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 namespace ClientTest
 {
     class Program
@@ -29,7 +30,7 @@ namespace ClientTest
                         }
                         catch (Exception e)
                         {
-                             Console.WriteLine("Enter an IP");
+                            Console.WriteLine("Enter an IP");
                             ip = Console.ReadLine();
                         }
                     }
@@ -40,16 +41,28 @@ namespace ClientTest
 
                     Stream stm = tcpClient.GetStream();
                     ASCIIEncoding asen = new ASCIIEncoding();
-                    //byte[] ba = asen.GetBytes(str);
+                    String str = Console.ReadLine();
+                    byte[] ba = asen.GetBytes(str);
                     Console.WriteLine("Sending...");
-                    stm.Write(ba, 0, ba.Length); byte[]
-                    bb = new byte[4096];
-                    int k = stm.Read(bb, 0, 100);
-                    for (int i = 0; i < k; i++)
+
+                    stm.Write(ba, 0, ba.Length);
+
+                    byte[] receivedInfo = new byte[4096];
+                    int bytesReceived = stm.Read(receivedInfo, 0, 4096);
+                    var binaryFormatter = new BinaryFormatter();
+                    
+                    using (var ms = new MemoryStream(receivedInfo))
                     {
-                        Console.Write(Convert.ToChar(bb[i]));
+                        int[,] musicInfo = (int[,])binaryFormatter.Deserialize(ms);
+                        Console.WriteLine(musicInfo);
+                        for(int x = 0; x < musicInfo.Length; x++)
+                        {
+                            Console.WriteLine(string.Format("Note {0} Duration {1}",musicInfo[0, x], musicInfo[1, x]));
+                            Console.Beep(musicInfo[0 , x] , musicInfo[1, x]);
+                        }
                     }
-                    tcpClient.Close();
+
+                        tcpClient.Close();
                 }
                 catch (Exception e)
                 {
